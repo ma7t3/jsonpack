@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
     const bool verboseMode = parser.isSet("verbose");
     JsonPacker packer;
     packer.setUidKeyName(parser.value("uid-key-name"));
+    packer.setJsonFormat(QJsonDocument::Indented); // TODO: Fix
     packer.setAllowOverwrite(parser.isSet("allow-overwrite"));
     packer.setDisableCleanup(parser.isSet("disable-cleanup"));
     packer.setDisableArrayInlining(parser.isSet("disable-array-inlining"));

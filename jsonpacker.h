@@ -2,6 +2,7 @@
 #define JSONPACKER_H
 
 #include <QObject>
+#include <QJsonDocument>
 
 class QFile;
 
@@ -23,6 +24,7 @@ public:
     };
 
     void setUidKeyName(const QString &newUidKeyName);
+    void setJsonFormat(QJsonDocument::JsonFormat newJsonFormat);
     void setAllowOverwrite(bool newAllowOverwrite);
     void setDisableCleanup(bool newDisableCleanup);
     void setDisableArrayInlining(bool newDisableArrayInlining);
@@ -41,6 +43,7 @@ signals:
 private:
     QString _uidKeyName;
     bool _allowOverwrite, _disableCleanup, _disableArrayInlining;
+    QJsonDocument::JsonFormat _jsonFormat;
 };
 
 #endif // JSONPACKER_H

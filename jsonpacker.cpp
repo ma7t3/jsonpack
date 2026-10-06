@@ -16,6 +16,10 @@ void JsonPacker::setUidKeyName(const QString &newUidKeyName) {
     _uidKeyName = newUidKeyName;
 }
 
+void JsonPacker::setJsonFormat(QJsonDocument::JsonFormat newJsonFormat) {
+    _jsonFormat = newJsonFormat;
+}
+
 void JsonPacker::setAllowOverwrite(bool newAllowOverwrite) {
     _allowOverwrite = newAllowOverwrite;
 }
