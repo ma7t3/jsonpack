@@ -57,6 +57,23 @@ bool JsonPacker::unpack(const QString &sourceFilePath, const QString &destinatio
         return false;
     }
 
+    if(doc.isNull()) {
+        emit message(ErrorMessage, ImportantMessage, tr("Source JSON is null."));
+        return false;
+    }
+
+    if(doc.isEmpty()) {
+        emit message(WarningMessage, ImportantMessage, tr("Source JSON is empty. Nothing to write."));
+        // TODO: Delete all contents?
+        return true;
+    }
+
+    if(doc.isObject())
+        return writeDirectory(doc.object(), destinationDir);
+
+    if(doc.isArray())
+        return writeDirectory(doc.array(), destinationDir);
+
     // TODO: Ipmlement
     emit message(WarningMessage, ImportantMessage, tr("NOT IMPLEMENTED!"));
     return false;
@@ -73,6 +90,78 @@ bool JsonPacker::pack(const QString &sourceDestinationPath, const QString &desti
 }
 
 bool JsonPacker::writeDirectory(const QJsonValue &value, const QDir &directory) {
+    QJsonObject indexObject;
+    ValueMetaType type = metaType(value);
+    indexObject.insert("$type", metaTypeString(value));
+
+    QSet<QString> touchedChildren;
+
+    if(type == ObjectType) {
+        const QJsonObject sourceObj = value.toObject();
+        const QStringList keys = sourceObj.keys();
+        for(const QString &key : keys) {
+            const QJsonValue &subVal = sourceObj.value(key);
+            if(metaType(subVal) == PrimitiveType) {
+                indexObject.insert(key, subVal);
+            } else {
+                if(!directory.mkdir(key)) {
+                    emit message(ErrorMessage, ImportantMessage, tr("Failed to create directory: %1").arg(directory.path() + "/" + key));
+                    return false;
+                } else {
+                    touchedChildren << key;
+                    if(!writeDirectory(subVal, directory.path() + "/" + key))
+                        return false;
+                }
+            }
+        }
+    } else if(type == ArrayType) {
+        QSet<QString> ids;
+        QJsonArray valuesArray;
+        const QJsonArray sourceArr = value.toArray();
+        const int indexDigitCount = sourceArr.count() == 0 ? 1 : static_cast<int>(std::log10(std::abs(sourceArr.count()))) + 1;
+        int i = -1;
+        for(auto it = sourceArr.begin(); it != sourceArr.end(); ++it) {
+            ++i;
+            QString id;
+            if(it->isObject() && it->toObject().contains(_uidKeyName) && it->toObject().value(_uidKeyName).isString()) {
+                id = it->toObject().value(_uidKeyName).toString();
+            } else {
+                id = QString("idx_%1").arg(i, indexDigitCount, 10, '0');
+            }
+            if(ids.contains(id)) {
+                emit message(ErrorMessage, ImportantMessage, tr("Duplicate id \"%1\" in %2").arg(id, directory.path()));
+                return false;
+            }
+            ids << id;
+            if(!directory.mkdir(id)) {
+                emit message(ErrorMessage, ImportantMessage, tr("Failed to create directory: %1").arg(directory.path() + "/" + id));
+                return false;
+            } else {
+                touchedChildren << id;
+                if(!writeDirectory(*it, directory.path() + "/" + id))
+                    return false;
+            }
+            valuesArray << id;
+        }
+        indexObject.insert("$values", valuesArray);
+    } else if(type == PrimitiveType) {
+        indexObject.insert("$value", value);
+    }
+
+    if(!_disableCleanup) {
+        const QStringList subDirs = directory.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+        for(const QString &subDir : subDirs) {
+            if(!touchedChildren.contains(subDir)) {
+                if(!directory.rmpath(subDir)) {
+                    emit message(ErrorMessage, ImportantMessage, tr("Failed to remove orphanded directory: %1").arg(directory.path() + "/" + subDir));
+                    return false;
+                }
+            }
+        }
+    }
+
+    writeJsonToFile(directory.path() + "/index.json", indexObject);
+
     return true;
 }
 
