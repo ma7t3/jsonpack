@@ -2,6 +2,14 @@
 
 #include <QCommandLineParser>
 
+#include <QDebug>
+
+enum ArgumentNames {
+    ActionArgument = 0,
+    SourceArgument = 1,
+    DestinationArgument = 2
+};
+
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
     a.setApplicationName("jsonpack");
@@ -20,6 +28,17 @@ int main(int argc, char *argv[]) {
     parser.addHelpOption();
 
     parser.process(a.arguments());
+    const QStringList arguments = parser.positionalArguments();
+
+    if(arguments.isEmpty()) {
+        parser.showHelp();
+        return 0;
+    }
+
+    if(arguments.size() != 3) {
+        qCritical().noquote() << QObject::tr("Error: Invalid parameter count. You must specify <action> <source> <destination>. See --help for more details.");
+        return 1;
+    }
 
     return 0;
 }
