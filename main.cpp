@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     const QString destination = arguments[DestinationArgument];
 
     if(action == UnpackAction)
-        return packer.unpack(source, destination);
+        return !packer.unpack(source, destination);
     else
-        return packer.pack(source, destination);
+        return !packer.pack(source, destination);
 }
