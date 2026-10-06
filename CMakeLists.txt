@@ -7,6 +7,7 @@ qt_standard_project_setup()
 
 qt_add_executable(jsonpack
     main.cpp
+    jsonpacker.h jsonpacker.cpp
 )
 
 target_link_libraries(jsonpack

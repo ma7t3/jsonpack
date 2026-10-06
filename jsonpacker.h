@@ -1,0 +1,39 @@
+#ifndef JSONPACKER_H
+#define JSONPACKER_H
+
+#include <QObject>
+
+class JsonPacker : public QObject {
+    Q_OBJECT
+
+public:
+    explicit JsonPacker(QObject *parent = nullptr);
+
+    enum MessageType {
+        InfoMessage,
+        WarningMessage,
+        ErrorMessage
+    };
+
+    enum MessageImportance {
+        ImportantMessage,
+        UnimportantMessage
+    };
+
+    void setUidKeyName(const QString &newUidKeyName);
+    void setDisableCleanup(bool newDisableCleanup);
+    void setDisableArrayInlining(bool newDisableArrayInlining);
+
+public slots:
+    bool unpack(const QString &sourceFilePath, const QString &destinationDirectoryPath);
+    bool pack(const QString &sourceDestinationPath, const QString &destintationFilePath);
+
+signals:
+    void message(JsonPacker::MessageType type, JsonPacker::MessageImportance importance, const QString &text);
+
+private:
+    QString _uidKeyName;
+    bool _disableCleanup, _disableArrayInlining;
+};
+
+#endif // JSONPACKER_H
