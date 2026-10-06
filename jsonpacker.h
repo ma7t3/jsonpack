@@ -23,6 +23,12 @@ public:
         UnimportantMessage
     };
 
+    enum ValueMetaType {
+        ObjectType,
+        ArrayType,
+        PrimitiveType
+    };
+
     void setUidKeyName(const QString &newUidKeyName);
     void setJsonFormat(QJsonDocument::JsonFormat newJsonFormat);
     void setAllowOverwrite(bool newAllowOverwrite);
@@ -38,6 +44,9 @@ protected:
     QJsonDocument readJsonFromData(const QByteArray &data, bool *ok);
     bool writeJsonToFile(const QString &fileName, const QJsonValue &value);
     static bool isFileInsideDir(const QString& filePath, const QString& dirPath);
+    ValueMetaType metaType(const QJsonValue &value) const;
+    QString metaTypeString(ValueMetaType type) const;
+    QString metaTypeString(const QJsonValue &value) const;
 
 signals:
     void message(JsonPacker::MessageType type, JsonPacker::MessageImportance importance, const QString &text);

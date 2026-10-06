@@ -142,3 +142,31 @@ bool JsonPacker::isFileInsideDir(const QString& filePath, const QString& dirPath
     return cleanFile.startsWith(cleanDir, Qt::CaseSensitive);
 #endif
 }
+
+QString JsonPacker::metaTypeString(ValueMetaType type) const {
+    return type == ObjectType ? "object" : type == ArrayType ? "array" : "primitive";
+}
+
+QString JsonPacker::metaTypeString(const QJsonValue &value) const {
+    return metaTypeString(metaType(value));
+}
+
+JsonPacker::ValueMetaType JsonPacker::metaType(const QJsonValue &value) const {
+    if(value.isObject())
+        return ObjectType;
+    else if(value.isArray()) {
+        if(_disableArrayInlining)
+            return ArrayType;
+
+        const QJsonArray arr = value.toArray();
+        bool complexFound = false;
+        for(const QJsonValue &subVal : arr) {
+            if(metaType(subVal) != PrimitiveType) {
+                complexFound = true;
+                break;
+            }
+        }
+        return complexFound ? ArrayType : PrimitiveType;
+    } else
+        return PrimitiveType;
+}
