@@ -29,6 +29,9 @@ public slots:
     bool unpack(const QString &sourceFilePath, const QString &destinationDirectoryPath);
     bool pack(const QString &sourceDestinationPath, const QString &destintationFilePath);
 
+protected:
+    static bool isFileInsideDir(const QString& filePath, const QString& dirPath);
+
 signals:
     void message(JsonPacker::MessageType type, JsonPacker::MessageImportance importance, const QString &text);
 
