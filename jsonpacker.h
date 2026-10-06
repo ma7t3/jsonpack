@@ -34,7 +34,9 @@ public slots:
     bool pack(const QString &sourceDestinationPath, const QString &destintationFilePath);
 
 protected:
+    QJsonDocument readJsonFromFile(const QString fileName, bool *ok);
     QJsonDocument readJsonFromData(const QByteArray &data, bool *ok);
+    bool writeJsonToFile(const QString &fileName, const QJsonValue &value);
     static bool isFileInsideDir(const QString& filePath, const QString& dirPath);
 
 signals:
