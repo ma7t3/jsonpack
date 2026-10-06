@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+class QFile;
+
 class JsonPacker : public QObject {
     Q_OBJECT
 
@@ -30,6 +32,7 @@ public slots:
     bool pack(const QString &sourceDestinationPath, const QString &destintationFilePath);
 
 protected:
+    QJsonDocument readJsonFromData(const QByteArray &data, bool *ok);
     static bool isFileInsideDir(const QString& filePath, const QString& dirPath);
 
 signals:

@@ -52,13 +52,10 @@ bool JsonPacker::unpack(const QString &sourceFilePath, const QString &destinatio
         return false;
     }
 
-    const QByteArray jsonData = sourceFile.readAll();
-    QJsonParseError error;
-    const QJsonDocument doc = QJsonDocument::fromJson(jsonData, &error);
-    if(error.error != QJsonParseError::NoError) {
-        emit message(ErrorMessage, ImportantMessage, tr("Failed to read source file. Invalid JSON: %1 at %2").arg(error.errorString()).arg(error.offset));
+    bool ok;
+    const QJsonDocument doc = readJsonFromData(sourceFile.readAll(), &ok);
+    if(!ok)
         return false;
-    }
 
     // TODO: Ipmlement
     emit message(WarningMessage, ImportantMessage, tr("NOT IMPLEMENTED!"));
@@ -73,6 +70,18 @@ bool JsonPacker::pack(const QString &sourceDestinationPath, const QString &desti
     return false;
 
     return true;
+}
+
+QJsonDocument JsonPacker::readJsonFromData(const QByteArray &data, bool *ok) {
+    QJsonParseError error;
+    const QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if(error.error != QJsonParseError::NoError) {
+        emit message(ErrorMessage, ImportantMessage, tr("Failed to read source file. Invalid JSON: %1 at %2").arg(error.errorString()).arg(error.offset));
+    }
+    if(ok)
+        *ok = error.error == QJsonParseError::NoError;
+
+    return doc;
 }
 
 bool JsonPacker::isFileInsideDir(const QString& filePath, const QString& dirPath) {
