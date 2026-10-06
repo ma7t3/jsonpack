@@ -2,6 +2,7 @@
 #define JSONPACKER_H
 
 #include <QObject>
+#include <QDir>
 #include <QJsonDocument>
 
 class QFile;
@@ -40,6 +41,10 @@ public slots:
     bool pack(const QString &sourceDestinationPath, const QString &destintationFilePath);
 
 protected:
+    bool writeDirectory(const QJsonValue &value, const QDir &directory);
+
+    QJsonValue parseDirectory(const QDir &directory);
+
     QJsonDocument readJsonFromFile(const QString fileName, bool *ok);
     QJsonDocument readJsonFromData(const QByteArray &data, bool *ok);
     bool writeJsonToFile(const QString &fileName, const QJsonValue &value);

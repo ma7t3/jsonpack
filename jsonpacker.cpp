@@ -72,6 +72,14 @@ bool JsonPacker::pack(const QString &sourceDestinationPath, const QString &desti
     return true;
 }
 
+bool JsonPacker::writeDirectory(const QJsonValue &value, const QDir &directory) {
+    return true;
+}
+
+QJsonValue JsonPacker::parseDirectory(const QDir &directory) {
+    return QJsonValue();
+}
+
 QJsonDocument JsonPacker::readJsonFromFile(const QString fileName, bool *ok){
     QFile f(fileName);
     if(!f.open(QFile::ReadOnly)) {
