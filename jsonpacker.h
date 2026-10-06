@@ -21,6 +21,7 @@ public:
     };
 
     void setUidKeyName(const QString &newUidKeyName);
+    void setAllowOverwrite(bool newAllowOverwrite);
     void setDisableCleanup(bool newDisableCleanup);
     void setDisableArrayInlining(bool newDisableArrayInlining);
 
@@ -33,7 +34,7 @@ signals:
 
 private:
     QString _uidKeyName;
-    bool _disableCleanup, _disableArrayInlining;
+    bool _allowOverwrite, _disableCleanup, _disableArrayInlining;
 };
 
 #endif // JSONPACKER_H

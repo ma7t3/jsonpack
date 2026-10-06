@@ -26,8 +26,9 @@ int main(int argc, char *argv[]) {
     QCommandLineParser parser;
     parser.addPositionalArgument(QObject::tr("action"), QObject::tr(R"(The action to be executed ("pack" to pack a given directory into a single JSON file or "unpack" to unpack a given single JSON file into a directory.))"));
     parser.addPositionalArgument(QObject::tr("source"), QObject::tr("The source file or directory to read data from. It must exist."));
-    parser.addPositionalArgument(QObject::tr("destination"), QObject::tr("The destination file or directory to write the data into. If it doesn't already exist, it'll be created automatically. If it already exists, it'll be overwritten (files) or must be empty (directories)"));
-    parser.addOption(QCommandLineOption("disable-cleanup", QObject::tr("Disable the automatic cleanup of orphanded directories and files.")));
+    parser.addPositionalArgument(QObject::tr("destination"), QObject::tr("The destination file or directory to write the data into. If it doesn't already exist, it'll be created automatically."));
+    parser.addOption(QCommandLineOption("allow-overwrite", QObject::tr("Allows to overwrite existing files and directories. Otherwise failes.")));
+    parser.addOption(QCommandLineOption("disable-cleanup", QObject::tr("Disable the automatic cleanup of orphanded directories and files. This is only useful if --allow-overwrite is set.")));
     parser.addOption(QCommandLineOption("disable-array-inlining", QObject::tr("Disable the automatic inlining of array only containing primitive values.")));
     parser.addOption(QCommandLineOption(QStringList{"u", "uid-key-name"}, QObject::tr("Specifies the name of the key of objects which is considered a unique identifier. Default ist \"id\"."), "KeyName", "id"));
     parser.addOption(QCommandLineOption("verbose", QObject::tr("Log more events, can produce a lot of output")));
@@ -58,6 +59,7 @@ int main(int argc, char *argv[]) {
     const bool verboseMode = parser.isSet("verbose");
     JsonPacker packer;
     packer.setUidKeyName(parser.value("uid-key-name"));
+    packer.setAllowOverwrite(parser.isSet("allow-overwrite"));
     packer.setDisableCleanup(parser.isSet("disable-cleanup"));
     packer.setDisableArrayInlining(parser.isSet("disable-array-inlining"));
 

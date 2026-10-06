@@ -1,11 +1,15 @@
 #include "jsonpacker.h"
 
 JsonPacker::JsonPacker(QObject *parent)
-    : QObject{parent}, _uidKeyName{"id"}, _disableCleanup{false}, _disableArrayInlining{false}
+    : QObject{parent}, _uidKeyName{"id"}, _allowOverwrite{false}, _disableCleanup{false}, _disableArrayInlining{false}
 {}
 
 void JsonPacker::setUidKeyName(const QString &newUidKeyName) {
     _uidKeyName = newUidKeyName;
+}
+
+void JsonPacker::setAllowOverwrite(bool newAllowOverwrite) {
+    _allowOverwrite = newAllowOverwrite;
 }
 
 void JsonPacker::setDisableCleanup(bool newDisableCleanup) {
