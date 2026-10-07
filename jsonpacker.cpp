@@ -151,6 +151,9 @@ bool JsonPacker::writeDirectory(const QJsonValue &value, const QDir &directory) 
     if(!_disableCleanup) {
         const QStringList subDirs = directory.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
         for(const QString &subDir : subDirs) {
+            if(subDir.startsWith(".")) // keep hidden files and directories (like .git etc.)
+                continue;
+
             if(!touchedChildren.contains(subDir)) {
                 if(!directory.rmpath(subDir)) {
                     emit message(ErrorMessage, ImportantMessage, tr("Failed to remove orphanded directory: %1").arg(directory.path() + "/" + subDir));
