@@ -239,6 +239,10 @@ bool JsonPacker::isFileInsideDir(const QString& filePath, const QString& dirPath
 #endif
 }
 
+JsonPacker::ValueMetaType JsonPacker::metaTypeFromString(const QString &typeName) {
+    return typeName == "object" ? ObjectType : typeName == "array" ? ArrayType : typeName == "primitive" ? PrimitiveType : UnknownType;
+}
+
 QString JsonPacker::metaTypeString(ValueMetaType type) const {
     return type == ObjectType ? "object" : type == ArrayType ? "array" : "primitive";
 }

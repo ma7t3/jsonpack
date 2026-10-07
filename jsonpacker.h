@@ -51,6 +51,7 @@ protected:
     bool writeJsonToFile(const QString &fileName, const QJsonValue &value);
     static bool isFileInsideDir(const QString& filePath, const QString& dirPath);
     ValueMetaType metaType(const QJsonValue &value) const;
+    static ValueMetaType metaTypeFromString(const QString &typeName);
     QString metaTypeString(ValueMetaType type) const;
     QString metaTypeString(const QJsonValue &value) const;
 
