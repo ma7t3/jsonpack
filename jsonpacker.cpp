@@ -74,10 +74,6 @@ bool JsonPacker::unpack(const QString &sourceFilePath, const QString &destinatio
     if(doc.isArray())
         return writeDirectory(doc.array(), destinationDir);
 
-    // TODO: Ipmlement
-    emit message(WarningMessage, ImportantMessage, tr("NOT IMPLEMENTED!"));
-    return false;
-
     return true;
 }
 
