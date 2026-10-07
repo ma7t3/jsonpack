@@ -104,7 +104,7 @@ bool JsonPacker::writeDirectory(const QJsonValue &value, const QDir &directory) 
             if(metaType(subVal) == PrimitiveType) {
                 indexObject.insert(key, subVal);
             } else {
-                if(!directory.mkdir(key)) {
+                if(!QDir(directory.path() + "/" + key).exists() && !directory.mkdir(key)) {
                     emit message(ErrorMessage, ImportantMessage, tr("Failed to create directory: %1").arg(directory.path() + "/" + key));
                     return false;
                 } else {
