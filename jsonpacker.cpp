@@ -164,7 +164,7 @@ bool JsonPacker::writeDirectory(const QJsonValue &value, const QDir &directory) 
     return true;
 }
 
-QJsonValue JsonPacker::parseDirectory(const QDir &directory) {
+QJsonValue JsonPacker::parseDirectory(const QDir &directory, bool *ok) {
     return QJsonValue();
 }
 

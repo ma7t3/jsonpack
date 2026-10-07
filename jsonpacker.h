@@ -44,7 +44,7 @@ public slots:
 protected:
     bool writeDirectory(const QJsonValue &value, const QDir &directory);
 
-    QJsonValue parseDirectory(const QDir &directory);
+    QJsonValue parseDirectory(const QDir &directory, bool *ok);
 
     QJsonDocument readJsonFromFile(const QString fileName, bool *ok);
     QJsonDocument readJsonFromData(const QByteArray &data, bool *ok);
