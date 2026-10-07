@@ -27,7 +27,8 @@ public:
     enum ValueMetaType {
         ObjectType,
         ArrayType,
-        PrimitiveType
+        PrimitiveType,
+        UnknownType
     };
 
     void setUidKeyName(const QString &newUidKeyName);
