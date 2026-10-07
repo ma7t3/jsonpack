@@ -78,9 +78,39 @@ bool JsonPacker::unpack(const QString &sourceFilePath, const QString &destinatio
 }
 
 bool JsonPacker::pack(const QString &sourceDirectoryPath, const QString &destinationFilePath) {
-    // TODO: Ipmlement
-    emit message(WarningMessage, ImportantMessage, tr("NOT IMPLEMENTED!"));
-    return false;
+    QDir sourceDir(sourceDirectoryPath);
+
+    if(isFileInsideDir(destinationFilePath, sourceDirectoryPath)) {
+        emit message(ErrorMessage, ImportantMessage, tr("Invalid destination file. It cannot be inside the source directory."));
+        return 1;
+    }
+
+    if(!sourceDir.exists()) {
+        emit message(ErrorMessage, ImportantMessage, tr("Source directory doesn't exist."));
+        return 1;
+    }
+
+    if(QFile::exists(destinationFilePath) && !_allowOverwrite) {
+        emit message(ErrorMessage, ImportantMessage, tr("Failed to write destination file. It must not exist. User another path or try --allow-overwrite."));
+        return false;
+    }
+
+    bool ok;
+    QJsonValue value = parseDirectory(sourceDir, &ok);
+    if(!ok) {
+        emit message(ErrorMessage, ImportantMessage, tr("Couldn't pack directory. Failed to parse the root directory."));
+        return false;
+    }
+
+    if(!value.isObject() && !value.isArray()) {
+        emit message(ErrorMessage, ImportantMessage, tr("Couldn't pack directory. Root value must be an object or array."));
+        return false;
+    }
+
+    if(!writeJsonToFile(destinationFilePath, value)) {
+        emit message(ErrorMessage, ImportantMessage, tr("Couldn't write destination file."));
+        return false;
+    }
 
     return true;
 }
@@ -165,7 +195,101 @@ bool JsonPacker::writeDirectory(const QJsonValue &value, const QDir &directory) 
 }
 
 QJsonValue JsonPacker::parseDirectory(const QDir &directory, bool *ok) {
-    return QJsonValue();
+
+    bool readingOk;
+    const QJsonObject indexObject = readJsonFromFile(directory.path() + "/index.json", &readingOk).object();
+    if(!readingOk) {
+        *ok = false;
+        return QJsonValue();
+    }
+
+    const ValueMetaType type = metaTypeFromString(indexObject.value("$type").toString());
+    if(type == UnknownType) {
+        emit message(ErrorMessage, ImportantMessage, tr("Unknown type \"%1\" in %2").arg(indexObject.value("$type").toString(), directory.path() + "/index.json"));
+        *ok = false;
+        return QJsonValue();
+    }
+
+    if(type == ObjectType) {
+        QJsonObject resultObject;
+        for(auto it = indexObject.begin(); it != indexObject.end(); ++it) {
+            if(it.key() == "$type")
+                continue;
+            resultObject.insert(it.key(), it.value());
+        }
+
+        for(const QString &dirName : directory.entryList(QDir::Dirs|QDir::NoDotAndDotDot)) {
+            bool subDirOk;
+            const QJsonValue subValue = parseDirectory(directory.path() + "/" + dirName, &subDirOk);
+            if(!subDirOk) {
+                *ok = false;
+                return QJsonValue();
+            }
+
+            resultObject.insert(dirName, subValue);
+        }
+
+        *ok = true;
+        return resultObject;
+
+    }
+
+    if(type == ArrayType) {
+        QJsonArray resultArray;
+        if(!indexObject.contains("$items") || !indexObject.value("$items").isArray()) {
+            emit message(ErrorMessage, ImportantMessage, tr("Invalid index.json key $items in %1").arg(directory.path() + "/index.json"));
+            *ok = false;
+            return QJsonValue();
+        }
+        QStringList pendingSubDirs = directory.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+        const QStringList itemIdArray = indexObject.value("$items").toVariant().toStringList();
+        int i = -1;
+        for(const QString &id : itemIdArray) {
+            ++i;
+            QDir subDir = directory.path() + "/" + id;
+            if(!subDir.exists()) {
+                emit message(ErrorMessage, ImportantMessage, tr("Invalid id %1 in array $items[%2] in %3").arg(id, QString::number(i), directory.path() + "/index.json"));
+                *ok = false;
+                return QJsonValue();
+            }
+
+            bool subDirOk;
+            const QJsonValue subValue = parseDirectory(subDir.path(), &subDirOk);
+            if(!subDirOk) {
+                *ok = false;
+                return QJsonValue();
+            }
+            resultArray << subValue;
+            pendingSubDirs.removeAll(id);
+        }
+
+        i = -1;
+        for(const QString &subDirName : std::as_const(pendingSubDirs)) {
+            ++i;
+            emit message(WarningMessage, ImportantMessage, tr("Value with id %1 directory %2 exists but not listed in index.json. Appending to result array...").arg(subDirName, directory.dirName()));
+            QDir subDir = directory.path() + "/" + subDirName;
+            bool subDirOk;
+            const QJsonValue subValue = parseDirectory(subDir.path(), &subDirOk);
+            if(!subDirOk) {
+                *ok = false;
+                return QJsonValue();
+            }
+            resultArray << subValue;
+        }
+
+        *ok = true;
+        return resultArray;
+
+    }
+
+    if(!indexObject.contains("$value")) {
+        emit message(ErrorMessage, ImportantMessage, tr("index.json represents a pritive value but doesn't contain a $value key in %1").arg(directory.path() + "/index.json"));
+        *ok = false;
+        return QJsonValue();
+    }
+
+    *ok = true;
+    return indexObject.value("$value");
 }
 
 QJsonDocument JsonPacker::readJsonFromFile(const QString fileName, bool *ok){
