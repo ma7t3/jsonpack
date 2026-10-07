@@ -169,7 +169,7 @@ bool JsonPacker::writeDirectory(const QJsonValue &value, const QDir &directory) 
             }
             valuesArray << id;
         }
-        indexObject.insert("$values", valuesArray);
+        indexObject.insert("$items", valuesArray);
     } else if(type == PrimitiveType) {
         indexObject.insert("$value", value);
     }
