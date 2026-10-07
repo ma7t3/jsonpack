@@ -77,7 +77,7 @@ bool JsonPacker::unpack(const QString &sourceFilePath, const QString &destinatio
     return true;
 }
 
-bool JsonPacker::pack(const QString &sourceDestinationPath, const QString &destintationFilePath) {
+bool JsonPacker::pack(const QString &sourceDirectoryPath, const QString &destinationFilePath) {
     // TODO: Ipmlement
     emit message(WarningMessage, ImportantMessage, tr("NOT IMPLEMENTED!"));
     return false;

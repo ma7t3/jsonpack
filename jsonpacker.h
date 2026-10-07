@@ -38,7 +38,7 @@ public:
 
 public slots:
     bool unpack(const QString &sourceFilePath, const QString &destinationDirectoryPath);
-    bool pack(const QString &sourceDestinationPath, const QString &destintationFilePath);
+    bool pack(const QString &sourceDirectoryPath, const QString &destinationFilePath);
 
 protected:
     bool writeDirectory(const QJsonValue &value, const QDir &directory);
